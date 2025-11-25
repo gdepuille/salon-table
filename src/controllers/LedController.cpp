@@ -14,8 +14,8 @@ void LedController::setup() {
 
 void LedController::process() {
 
-  if (ledEnabled) {
-    if (ledMode == SIMPLE) {
+  if (enabled) {
+    if (ledMode == COLOR) {
       fill_solid(leds, NUM_LEDS, color);
 
     } else if (ledMode == ANIMATION) {
@@ -23,7 +23,7 @@ void LedController::process() {
       callAnnimation();
 
     } else if (ledMode == GAME) {
-      //gamePattern[gameIndex]();
+      callGame();
 
     }
 
@@ -31,65 +31,110 @@ void LedController::process() {
     fadeToBlackBy(leds, NUM_LEDS, 25);
   }
 
+  // TODO Pulse
   FastLED.setBrightness(brightness);
   FastLED.show();
 }
 
-void LedController::setEnabled(const bool value) {
-  if (value == ledEnabled)
-    return;
+LedController* LedController::setEnabled(const bool value) {
+  if (value == enabled)
+    return this;
 
-  Log.infoln("Change enabled : %d -> %d", ledEnabled, value);
-  ledEnabled = value;
+  Log.infoln("Change enabled : %d -> %d", enabled, value);
+  enabled = value;
+  return this;
 }
 
-void LedController::setMode(const LedMode value) {
+bool LedController::isEnabled() const {
+  return this->enabled;
+}
+
+LedController* LedController::setPulse(const bool value) {
+  if (value == pulse)
+    return this;
+
+  Log.infoln("Change pulse : %d -> %d", pulse, value);
+  pulse = value;
+  return this;
+}
+
+bool LedController::isPulse() const {
+  return this->pulse;
+}
+
+LedController* LedController::setMode(const LedMode value) {
   if (value == ledMode)
-    return;
+    return this;
 
   Log.infoln("Change mode : %d -> %d", ledMode, value);
   ledMode = value;
+  return this;
 }
 
-void LedController::setColor(const CRGB value) {
+LedMode LedController::getMode() const {
+  return ledMode;
+}
+
+LedController* LedController::setColor(const CRGB value) {
   if (value == color)
-    return;
+    return this;
 
   Log.infoln("Change color : %s -> %s", color.toString().c_str(), value.toString().c_str());
   color = value;
+  return this;
 }
 
-void LedController::setBrightness(const uint8_t value) {
+CRGB LedController::getColor() const {
+  return color;
+}
+
+LedController* LedController::setBrightness(const uint8_t value) {
   if (value == brightness)
-    return;
+    return this;
 
   Log.infoln("Change brightness : %d -> %d", brightness, value);
   brightness = value;
+  return this;
 }
 
-void LedController::setIndex(const uint8_t value) {
+uint8_t LedController::getBrightness() const {
+  return brightness;
+}
+
+LedController* LedController::setIndex(const uint8_t value) {
   if (value == index)
-    return;
+    return this;
 
   Log.infoln("Change index : %d -> %d", this->index, value);
   this->index = value;
+  return this;
+}
+
+uint8_t LedController::getIndex() const {
+  return index;
 }
 
 void LedController::callAnnimation() {
-
-  if (index < 0) index = 0;
-  if (index > 5) index = 5;
-
-  // Appel dynamique
-  switch (index) {
+  checkIndex();
+  switch (index) { // Appel dynamique
     case 0: rainbow(); break;
     case 1: rainbowWithGlitter(); break;
     case 2: confetti(); break;
     case 3: sinelon(); break;
     case 4: bpm(); break;
     case 5:
-    default: juggle(); break;
+    default: juggle();
   }
+}
+
+void LedController::callGame() {
+  checkIndex();
+  // NOPE
+}
+
+String LedController::animationName() {
+  checkIndex();
+  return animationNames[index];
 }
 
 
@@ -155,4 +200,13 @@ void LedController::addGlitter(fract8 chanceOfGlitter) {
   if (random8() < chanceOfGlitter) {
     leds[random16(NUM_LEDS)] += CRGB::White;
   }
+}
+
+void LedController::checkIndex() {
+  uint8_t max = 0;
+  if (ledMode == ANIMATION) max = animationNames.size() - 1;
+  else if (ledMode == GAME) max = 1;
+
+  if (index < 0) index = 0;
+  if (index > max) index = max;
 }

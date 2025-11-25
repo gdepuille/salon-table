@@ -5,6 +5,8 @@
 #ifndef SALON_TABLE_LEDCONTROLLER_H
 #define SALON_TABLE_LEDCONTROLLER_H
 
+#include <vector>
+
 #include <FastLED.h>
 
 // Leds
@@ -14,7 +16,7 @@
 #define NUM_LEDS ((LEDS_WIDHT * 2) + (LEDS_HEIGHT * 2))
 
 enum LedMode {
-  SIMPLE = 0,
+  COLOR = 0,
   ANIMATION = 1,
   GAME = 2,
 };
@@ -35,16 +37,36 @@ public:
   void setup();
   void process();
 
-  void setEnabled(bool value);
-  void setMode(LedMode value);
-  void setColor(CRGB value);
-  void setBrightness(uint8_t value);
-  void setIndex(uint8_t value);
+  String animationName();
+
+  std::vector<String> animationNames = {
+    "Rainbow", "Rainbow (glitter)", "Confetti",
+    "Sinelon", "BPM","Juggle"
+  };
+
+  LedController* setEnabled(bool value);
+  bool isEnabled() const;
+
+  LedController* setPulse(bool value);
+  bool isPulse() const;
+
+  LedController* setBrightness(uint8_t value);
+  uint8_t getBrightness() const;
+
+  LedController* setMode(LedMode value);
+  LedMode getMode() const;
+
+  LedController* setColor(CRGB value);
+  CRGB getColor() const;
+
+  LedController* setIndex(uint8_t value);
+  uint8_t getIndex() const;
 
 private:
   CRGB leds[NUM_LEDS];
 
-  bool ledEnabled = true;
+  bool enabled = true;
+  bool pulse = false;
   LedMode ledMode = ANIMATION;
   uint8_t index = 0;
 
@@ -53,6 +75,8 @@ private:
   CRGB color = CRGB::White;
 
   void callAnnimation();
+  void callGame();
+  void checkIndex();
 
   void rainbow();
   void rainbowWithGlitter();

@@ -24,17 +24,21 @@ public:
     delete this->ledController;
   }
 
-  void setup();
+  void setup() const;
 private:
   AsyncWebServer *server;
   LedController *ledController;
 
   static void handleGetInfos(AsyncWebServerRequest *request);
-  static void handleGetStatus(AsyncWebServerRequest *request);
+  void handleGetStatus(AsyncWebServerRequest *request) const;
 
-  void handlePostModeSimple(AsyncWebServerRequest *request, const JsonVariant &json) const;
-  void handlePostModeAnimation(AsyncWebServerRequest *request, const JsonVariant &json) const;
-  void handlePostModeGame(AsyncWebServerRequest *request, const JsonVariant &json) const;
+  void handleGetAnimations(AsyncWebServerRequest *request) const;
+  static void handleGetGames(AsyncWebServerRequest *request);
+
+  void handlePostState(AsyncWebServerRequest *request, const JsonVariant &json) const;
+  void handlePostColor(AsyncWebServerRequest *request, const JsonVariant &json) const;
+  void handlePostAnimation(AsyncWebServerRequest *request, const JsonVariant &json) const;
+  void handlePostGame(AsyncWebServerRequest *request, const JsonVariant &json) const;
 };
 
 
