@@ -10,7 +10,7 @@
 #include <FastLED.h>
 
 // Leds
-#define LEDS_DATA_PIN D6
+#define LEDS_DATA_PIN D2
 #define LEDS_WIDHT 56
 #define LEDS_HEIGHT 19
 #define NUM_LEDS ((LEDS_WIDHT * 2) + (LEDS_HEIGHT * 2))

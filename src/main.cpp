@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <ArduinoLog.h>
 #include <I2CScanner.h>
+#include <OneButton.h>
 
 #include <service/APIService.h>
 #include <controllers/NetworkController.h>
@@ -17,6 +18,12 @@ auto api = APIService(&led);
 // Capacitive sensor
 auto cap = Adafruit_CAP1188();
 auto cap_present = false;
+
+// Buttons
+auto btnLeft = OneButton(D4, true, true);
+auto btnLeftClicked = false;
+auto btnRight = OneButton(D5, true, true);
+auto btnRightClicked = false;
 
 void setup() {
   Serial.begin(115200);
@@ -49,6 +56,10 @@ void setup() {
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
 
+  // Init buttons
+  btnLeft.attachClick([]() { btnLeftClicked = !btnLeftClicked; });
+  btnRight.attachClick([]() { btnRightClicked = !btnRightClicked; });
+
   Log.infoln("Capacitive sensor configuration");
   if (!cap.begin()) {
     Log.warningln("CAP1188 not found");
@@ -61,12 +72,23 @@ void setup() {
 
 void loop() {
   network.process();
+  btnLeft.tick();
+  btnRight.tick();
 
   EVERY_N_MILLIS(1000) {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   }
 
   EVERY_N_MILLIS(20) {
-    led.process(cap.touched());
+    auto touched = cap.touched();
+    if (touched == 0) {
+      if (btnLeftClicked) {
+        touched |= 1 << 0;
+      }
+      if (btnRightClicked) {
+        touched |= 1 << 1;
+      }
+    }
+    led.process(touched);
   }
 }
