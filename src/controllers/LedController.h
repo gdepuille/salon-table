@@ -63,6 +63,10 @@ public:
   LedController* setIndex(uint8_t value);
   uint8_t getIndex() const;
 
+  void otaStart();
+  void otaProgress(uint8_t percent);
+  void otaEnd();
+
 private:
   CRGB leds[NUM_LEDS];
 
@@ -75,10 +79,20 @@ private:
   uint8_t brightness = 180;
   CRGB color = CRGB::White;
 
+  enum OtaState : uint8_t {
+    OTA_IDLE = 0,
+    OTA_START = 1,
+    OTA_PROGRESS = 2,
+    OTA_END = 3
+  };
+
+  OtaState otaState = OTA_IDLE;
+  uint8_t otaPercent = 0;
 
   void callAnnimation();
   void callGame();
   void updateSensorLeds(uint8_t sensorTouched);
+  void updateOtaLeds();
   void checkIndex();
 
   void rainbow();

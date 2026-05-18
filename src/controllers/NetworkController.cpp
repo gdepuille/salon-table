@@ -3,6 +3,7 @@
 //
 
 #include <controllers/NetworkController.h>
+#include <controllers/LedController.h>
 
 #include <ArduinoLog.h>
 #include <ArduinoOTA.h>
@@ -27,24 +28,44 @@ void NetworkController::enableOTA(const String& otaPassword) {
   ArduinoOTA.setHostname(WiFiClass::getHostname());
   ArduinoOTA.setPassword(otaPassword.c_str());
 
-  ArduinoOTA.onStart([]() -> void {
+  ArduinoOTA.onStart([this]() -> void {
     Log.infoln("Start OTA");
+    if (this->ledController != nullptr) {
+      this->ledController->otaStart();
+      this->ledController->process(0);
+    }
     digitalWrite(LED_BUILTIN, LOW);
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_GREEN, LOW);
     digitalWrite(LED_BLUE, LOW);
   });
 
-  ArduinoOTA.onEnd([]() -> void {
+  ArduinoOTA.onEnd([this]() -> void {
     Log.infoln("End OTA");
+    if (this->ledController != nullptr) {
+      this->ledController->otaEnd();
+      this->ledController->process(0);
+    }
     digitalWrite(LED_BUILTIN, HIGH);
     digitalWrite(LED_RED, HIGH);
     digitalWrite(LED_GREEN, HIGH);
     digitalWrite(LED_BLUE, HIGH);
   });
-  ArduinoOTA.onProgress([](int current, int total) -> void {
-    const int pct = (current / (total / 100));
+
+  ArduinoOTA.onProgress([this](int current, int total) -> void {
+    int pct = 0;
+    if (total > 0) {
+      pct = (current * 100) / total;
+    }
+    if (pct > 100) {
+      pct = 100;
+    }
     Log.infoln("Upgrade %d %%", pct);
+
+    if (this->ledController != nullptr) {
+      this->ledController->otaProgress(static_cast<uint8_t>(pct));
+      this->ledController->process(0);
+    }
 
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     if (pct > 40) {
@@ -68,6 +89,10 @@ void NetworkController::enableOTA(const String& otaPassword) {
   this->otaEnabled = true;
 
   Log.infoln("OTA is enabled");
+}
+
+void NetworkController::setLedController(LedController* value) {
+  this->ledController = value;
 }
 
 void NetworkController::process() {

@@ -45,8 +45,9 @@ void setup() {
   }
 
   network.connectWifi(WIFI_SSID, WIFI_PASS);
-  network.enableOTA(OTA_PASSWORD);
   led.setup();
+  network.setLedController(&led);
+  network.enableOTA(OTA_PASSWORD);
   api.setup();
 
   Log.infoln("IO Configuration");

@@ -12,7 +12,13 @@ void LedController::setup() {
   FastLED.setBrightness(brightness);
 }
 
-void LedController::process() {
+void LedController::process(uint8_t sensorTouched) {
+  if (otaState != OTA_IDLE) {
+    updateOtaLeds();
+    FastLED.setBrightness(brightness);
+    FastLED.show();
+    return;
+  }
 
   if (enabled) {
     if (ledMode == COLOR) {
@@ -117,6 +123,24 @@ uint8_t LedController::getIndex() const {
   return index;
 }
 
+void LedController::otaStart() {
+  otaPercent = 0;
+  otaState = OTA_START;
+}
+
+void LedController::otaProgress(uint8_t percent) {
+  if (percent > 100) {
+    percent = 100;
+  }
+  otaPercent = percent;
+  otaState = OTA_PROGRESS;
+}
+
+void LedController::otaEnd() {
+  otaPercent = 100;
+  otaState = OTA_END;
+}
+
 void LedController::callAnnimation() {
   checkIndex();
   switch (index) { // Appel dynamique
@@ -196,6 +220,30 @@ void LedController::updateSensorLeds(uint8_t sensorTouched) {
   }
 }
 
+void LedController::updateOtaLeds() {
+  if (otaState == OTA_START) {
+    fill_solid(leds, NUM_LEDS, CRGB::Red);
+    return;
+  }
+
+  if (otaState == OTA_PROGRESS) {
+    fill_solid(leds, NUM_LEDS, CRGB::Red);
+
+    int greenCount = (NUM_LEDS * otaPercent) / 100;
+    if (greenCount > NUM_LEDS) {
+      greenCount = NUM_LEDS;
+    }
+
+    for (int i = 0; i < greenCount; ++i) {
+      leds[i] = CRGB::Green;
+    }
+    return;
+  }
+
+  if (otaState == OTA_END) {
+    fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  }
+}
 
 // --------- //
 // ANIMATION //

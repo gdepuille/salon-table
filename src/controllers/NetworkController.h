@@ -8,6 +8,8 @@
 #include <WString.h>
 #include <utility>
 
+#include "LedController.h"
+
 class NetworkController {
 
 public:
@@ -19,7 +21,11 @@ public:
   void enableOTA(const String& otaPassword);
   void process();
 
+  void setLedController(LedController* value);
+
 private:
+  LedController* ledController = nullptr;
+
   String hostname;
 
   bool otaEnabled = false;
