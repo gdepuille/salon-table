@@ -25,6 +25,9 @@ void LedController::process() {
     } else if (ledMode == GAME) {
       callGame();
 
+    } else if (ledMode == SENSOR) {
+      updateSensorLeds(sensorTouched);
+
     }
 
   } else {
@@ -135,6 +138,62 @@ void LedController::callGame() {
 String LedController::animationName() {
   checkIndex();
   return animationNames[index];
+}
+
+void LedController::updateSensorLeds(uint8_t sensorTouched) {
+  constexpr uint8_t kBitCount = 8;
+  constexpr uint8_t kFadeStep = 40;
+
+  // Mapping physique: 56 LEDs (1,2,3), 19 LEDs (4), 56 LEDs (5,6,7), 19 LEDs (8).
+  // Les gaps de 5 LEDs ne sont appliques que dans les zones 1-3 et 5-7.
+  constexpr uint16_t kSensorStart[kBitCount] = {
+    0,   // Sensor 1
+    21,  // Sensor 2 (gap 16-20)
+    41,  // Sensor 3 (gap 36-40)
+    56,  // Sensor 4 (19 LEDs)
+    75,  // Sensor 5
+    96,  // Sensor 6 (gap 91-95)
+    116, // Sensor 7 (gap 111-115)
+    131  // Sensor 8 (19 LEDs)
+  };
+
+  constexpr uint8_t kSensorLength[kBitCount] = {
+    16, 15, 15, 19, 16, 15, 15, 19
+  };
+
+  const CRGB bitColors[kBitCount] = {
+    CRGB::Red,
+    CRGB::Blue,
+    CRGB::Green,
+    CRGB::Purple,
+    CRGB::Yellow,
+    CRGB::Orange,
+    CRGB::Aqua,
+    CRGB::White
+  };
+
+  CRGB targetLeds[NUM_LEDS];
+  fill_solid(targetLeds, NUM_LEDS, CRGB::Black);
+
+  for (uint8_t bit = 0; bit < kBitCount; ++bit) {
+    if ((sensorTouched & (1 << bit)) == 0) {
+      continue;
+    }
+
+    const int start = kSensorStart[bit];
+    int end = start + kSensorLength[bit];
+    if (end > NUM_LEDS) {
+      end = NUM_LEDS;
+    }
+    for (int led = start; led < end; ++led) {
+      targetLeds[led] = bitColors[bit];
+    }
+  }
+
+  // Interpole vers l'etat cible pour obtenir un fade in/out fluide.
+  for (int i = 0; i < NUM_LEDS; ++i) {
+    leds[i] = blend(leds[i], targetLeds[i], kFadeStep);
+  }
 }
 
 

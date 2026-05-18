@@ -52,7 +52,7 @@ void setup() {
   Log.infoln("Capacitive sensor configuration");
   if (!cap.begin()) {
     Log.warningln("CAP1188 not found");
-    //while (true);
+
   } else {
     cap_present = true;
     Log.infoln("CAP1188 found");
@@ -67,6 +67,6 @@ void loop() {
   }
 
   EVERY_N_MILLIS(20) {
-    led.process();
+    led.process(cap.touched());
   }
 }

@@ -19,6 +19,7 @@ enum LedMode {
   COLOR = 0,
   ANIMATION = 1,
   GAME = 2,
+  SENSOR = 3,
 };
 
 enum LedAnimation {
@@ -35,7 +36,7 @@ public:
   LedController() = default;
 
   void setup();
-  void process();
+  void process(uint8_t senorTouched);
 
   String animationName();
 
@@ -67,15 +68,17 @@ private:
 
   bool enabled = true;
   bool pulse = false;
-  LedMode ledMode = ANIMATION;
+  LedMode ledMode = SENSOR;
   uint8_t index = 0;
 
   uint8_t hue = 0;
-  uint8_t brightness = 20;
+  uint8_t brightness = 180;
   CRGB color = CRGB::White;
+
 
   void callAnnimation();
   void callGame();
+  void updateSensorLeds(uint8_t sensorTouched);
   void checkIndex();
 
   void rainbow();
