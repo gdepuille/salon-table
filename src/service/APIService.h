@@ -36,6 +36,7 @@ private:
   static void handleGetGames(AsyncWebServerRequest *request);
 
   void handlePostState(AsyncWebServerRequest *request, const JsonVariant &json) const;
+  void handlePostSensor(AsyncWebServerRequest *request, const JsonVariant &json) const;
   void handlePostColor(AsyncWebServerRequest *request, const JsonVariant &json) const;
   void handlePostAnimation(AsyncWebServerRequest *request, const JsonVariant &json) const;
   void handlePostGame(AsyncWebServerRequest *request, const JsonVariant &json) const;

@@ -20,6 +20,8 @@ void LedController::process(uint8_t sensorTouched) {
     return;
   }
 
+  this->sensorTouched = sensorTouched;
+
   if (enabled) {
     if (ledMode == COLOR) {
       fill_solid(leds, NUM_LEDS, color);
@@ -32,7 +34,7 @@ void LedController::process(uint8_t sensorTouched) {
       callGame();
 
     } else if (ledMode == SENSOR) {
-      updateSensorLeds(sensorTouched);
+      updateSensorLeds();
 
     }
 
@@ -123,6 +125,10 @@ uint8_t LedController::getIndex() const {
   return index;
 }
 
+uint8_t LedController::getSensorTouched() const {
+  return sensorTouched;
+}
+
 void LedController::otaStart() {
   otaPercent = 0;
   otaState = OTA_START;
@@ -164,7 +170,7 @@ String LedController::animationName() {
   return animationNames[index];
 }
 
-void LedController::updateSensorLeds(uint8_t sensorTouched) {
+void LedController::updateSensorLeds() {
   constexpr uint8_t kBitCount = 8;
   constexpr uint8_t kFadeStep = 40;
 

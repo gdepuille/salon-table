@@ -36,7 +36,7 @@ public:
   LedController() = default;
 
   void setup();
-  void process(uint8_t senorTouched);
+  void process(uint8_t sensorTouched);
 
   String animationName();
 
@@ -63,6 +63,8 @@ public:
   LedController* setIndex(uint8_t value);
   uint8_t getIndex() const;
 
+  uint8_t getSensorTouched() const;
+
   void otaStart();
   void otaProgress(uint8_t percent);
   void otaEnd();
@@ -79,6 +81,8 @@ private:
   uint8_t brightness = 180;
   CRGB color = CRGB::White;
 
+  uint8_t sensorTouched = 0;
+
   enum OtaState : uint8_t {
     OTA_IDLE = 0,
     OTA_START = 1,
@@ -91,7 +95,7 @@ private:
 
   void callAnnimation();
   void callGame();
-  void updateSensorLeds(uint8_t sensorTouched);
+  void updateSensorLeds();
   void updateOtaLeds();
   void checkIndex();
 

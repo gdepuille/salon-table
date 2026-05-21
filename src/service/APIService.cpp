@@ -9,6 +9,7 @@
 
 void APIService::setup() const {
   Log.infoln("Register API :");
+
   // Register simple API handler
   Log.infoln("GET /infos");
   server->on("/infos", HTTP_GET, [](AsyncWebServerRequest *request) { handleGetInfos(request); });
@@ -27,6 +28,11 @@ void APIService::setup() const {
   auto *postJsonState = new AsyncCallbackJsonWebHandler("/state", [this](AsyncWebServerRequest *request, JsonVariant &json) { handlePostState(request, json); });
   postJsonState->setMethod(HTTP_POST);
   server->addHandler(postJsonState);
+
+  Log.infoln("POST /sensor");
+  auto *postJsonSensor = new AsyncCallbackJsonWebHandler("/sensor", [this](AsyncWebServerRequest *request, JsonVariant &json) { handlePostSensor(request, json); });
+  postJsonSensor->setMethod(HTTP_POST);
+  server->addHandler(postJsonSensor);
 
   Log.infoln("POST /color");
   auto *postJsonColor = new AsyncCallbackJsonWebHandler("/color", [this](AsyncWebServerRequest *request, const JsonVariant &json) { handlePostColor(request, json); });
@@ -68,7 +74,13 @@ void APIService::handleGetStatus(AsyncWebServerRequest *request) const {
   state["intensity"] = static_cast<uint8_t>(100 * ledController->getBrightness() / 255);
 
   const LedMode mode = ledController->getMode();
-  if (mode == COLOR) {
+  root["mode"] = mode;
+
+  if (mode == SENSOR) {
+    const auto data = root["sensor"].to<JsonObject>();
+    data["touched"] = ledController->getSensorTouched();
+
+  } else if (mode == COLOR) {
     const auto data = root["color"].to<JsonObject>();
     const auto color = ledController->getColor();
     data["red"] = color.red;
@@ -134,6 +146,20 @@ void APIService::handlePostState(AsyncWebServerRequest *request, const JsonVaria
   ledController->setEnabled(jsonObj["enabled"]);
   uint8_t brightness = jsonObj["intensity"];
   ledController->setBrightness(brightness * 255 / 100);
+
+  auto *response = new AsyncJsonResponse();
+  const JsonObject root = response->getRoot().to<JsonObject>();
+  root["ack"] = true;
+  response->setLength();
+  request->send(response);
+}
+
+void APIService::handlePostSensor(AsyncWebServerRequest *request, const JsonVariant &json) const {
+  String jsonString = json.as<String>();
+  serializeJson(json, jsonString);
+  Log.infoln("POST /sensor : %s", jsonString.c_str());
+
+  ledController->setMode(SENSOR);
 
   auto *response = new AsyncJsonResponse();
   const JsonObject root = response->getRoot().to<JsonObject>();
