@@ -6,6 +6,46 @@
 
 #include <controllers/LedController.h>
 
+namespace {
+constexpr uint8_t kSensorCount = 8;
+constexpr uint16_t kSensorStart[kSensorCount] = {
+  0,   // Sensor 1
+  21,  // Sensor 2 (gap 16-20)
+  41,  // Sensor 3 (gap 36-40)
+  56,  // Sensor 4 (19 LEDs)
+  75,  // Sensor 5
+  96,  // Sensor 6 (gap 91-95)
+  116, // Sensor 7 (gap 111-115)
+  131  // Sensor 8 (19 LEDs)
+};
+
+constexpr uint8_t kSensorLength[kSensorCount] = {
+  16, 15, 15, 19, 16, 15, 15, 19
+};
+
+constexpr CRGB kSensorColors[kSensorCount] = {
+  CRGB::Red,
+  CRGB::Blue,
+  CRGB::Green,
+  CRGB::Purple,
+  CRGB::Yellow,
+  CRGB::Orange,
+  CRGB::Aqua,
+  CRGB::White
+};
+
+uint16_t wrapLedIndex(int32_t value) {
+  while (value < 0) {
+    value += NUM_LEDS;
+  }
+  return static_cast<uint16_t>(value % NUM_LEDS);
+}
+
+uint16_t sensorCenter(const uint8_t sensorIndex) {
+  return kSensorStart[sensorIndex] + (kSensorLength[sensorIndex] / 2);
+}
+}
+
 void LedController::setup() {
   Log.infoln("Led strip configuration");
   CFastLED::addLeds<NEOPIXEL, LEDS_DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
@@ -83,6 +123,9 @@ LedController* LedController::setMode(const LedMode value) {
 
   Log.infoln("Change mode : %d -> %d", ledMode, value);
   ledMode = value;
+  if (ledMode == GAME) {
+    gameState = GAME_IDLE;
+  }
   return this;
 }
 
@@ -140,11 +183,11 @@ void LedController::btnLeftPressed() {
 
 void LedController::btnLeftDoublePressed() {
   switch (getMode()) {
+    case SENSOR: setMode(ANIMATION); break;
     case ANIMATION: setMode(GAME); break;
-    case GAME: setMode(SENSOR); break;
-    case SENSOR:
+    case GAME:
     case COLOR:
-    default: setMode(ANIMATION); break;
+    default: setMode(SENSOR); break;
   }
 }
 
@@ -187,7 +230,7 @@ void LedController::startupGoogleHome() {
   delay(80);
 
   const uint16_t spacing = NUM_LEDS / 4;
-  for (uint16_t step = 0; step < (NUM_LEDS * 2); ++step) {
+  for (int step = 0; step < (NUM_LEDS * 2); ++step) {
     fadeToBlackBy(leds, NUM_LEDS, 85);
     for (uint8_t i = 0; i < 4; ++i) {
       const uint16_t pos = (step + (i * spacing)) % NUM_LEDS;
@@ -237,8 +280,7 @@ void LedController::callGame() {
 
   checkIndex();
   switch (index) {
-    case 0: gameLedRunner(); break;
-    case 1: gameRandomChoose(); break;
+    case 0: gameRandomChoose(); break;
     default: break;
   }
 }
@@ -248,42 +290,18 @@ String LedController::animationName() {
   return animationNames[index];
 }
 
+String LedController::gameName() {
+  checkIndex();
+  return gameNames[index];
+}
+
 void LedController::updateSensorLeds() {
-  constexpr uint8_t kBitCount = 8;
   constexpr uint8_t kFadeStep = 40;
-
-  // Mapping physique: 56 LEDs (1,2,3), 19 LEDs (4), 56 LEDs (5,6,7), 19 LEDs (8).
-  // Les gaps de 5 LEDs ne sont appliques que dans les zones 1-3 et 5-7.
-  constexpr uint16_t kSensorStart[kBitCount] = {
-    0,   // Sensor 1
-    21,  // Sensor 2 (gap 16-20)
-    41,  // Sensor 3 (gap 36-40)
-    56,  // Sensor 4 (19 LEDs)
-    75,  // Sensor 5
-    96,  // Sensor 6 (gap 91-95)
-    116, // Sensor 7 (gap 111-115)
-    131  // Sensor 8 (19 LEDs)
-  };
-
-  constexpr uint8_t kSensorLength[kBitCount] = {
-    16, 15, 15, 19, 16, 15, 15, 19
-  };
-
-  const CRGB bitColors[kBitCount] = {
-    CRGB::Red,
-    CRGB::Blue,
-    CRGB::Green,
-    CRGB::Purple,
-    CRGB::Yellow,
-    CRGB::Orange,
-    CRGB::Aqua,
-    CRGB::White
-  };
 
   CRGB targetLeds[NUM_LEDS];
   fill_solid(targetLeds, NUM_LEDS, CRGB::Black);
 
-  for (uint8_t bit = 0; bit < kBitCount; ++bit) {
+  for (uint8_t bit = 0; bit < kSensorCount; ++bit) {
     if ((sensorTouched & (1 << bit)) == 0) {
       continue;
     }
@@ -294,7 +312,7 @@ void LedController::updateSensorLeds() {
       end = NUM_LEDS;
     }
     for (int led = start; led < end; ++led) {
-      targetLeds[led] = bitColors[bit];
+      targetLeds[led] = kSensorColors[bit];
     }
   }
 
@@ -383,12 +401,81 @@ void LedController::animateJuggle() {
 // Game //
 // ---- //
 
-void LedController::gameLedRunner() {
-  // TODO
-}
-
 void LedController::gameRandomChoose() {
-  // TODO
+  if (gameState == GAME_IDLE) {
+    const uint8_t breath = beatsin8(10, 16, 96);
+    fill_solid(leds, NUM_LEDS, CRGB(breath, breath, breath));
+
+    if (btnRight) {
+      positionIndex = random8(kSensorCount);
+      gameRunnerHead = random16(NUM_LEDS);
+      gameRunStep = 0;
+      gameRunTotalSteps = ((2 + random8(2)) * NUM_LEDS)
+        + ((sensorCenter(positionIndex) + NUM_LEDS - gameRunnerHead) % NUM_LEDS);
+      if (gameRunTotalSteps == 0) {
+        gameRunTotalSteps = NUM_LEDS;
+      }
+      gameLastStepAt = millis();
+      gameState = GAME_RUN;
+      Log.infoln("Game random choose: target position %d", positionIndex);
+    }
+    return;
+  }
+
+  if (gameState == GAME_RUN) {
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+
+    constexpr uint8_t kRunnerSize = 16;
+    constexpr uint8_t kRunnerMinValue = 48;
+    for (uint8_t offset = 0; offset < kRunnerSize; ++offset) {
+      const uint16_t ledIndex = wrapLedIndex(static_cast<int32_t>(gameRunnerHead) - (kRunnerSize / 2) + offset);
+      leds[ledIndex] = CHSV(hue + (offset * (255 / kRunnerSize)), 255, kRunnerMinValue + (offset * 12));
+    }
+
+    leds[sensorCenter(positionIndex)] += CRGB(24, 24, 24);
+
+    const uint16_t currentDelay = map(gameRunStep, 0, gameRunTotalSteps, 12, 85);
+    if (millis() - gameLastStepAt >= currentDelay) {
+      gameLastStepAt = millis();
+
+      if (gameRunStep < gameRunTotalSteps) {
+        gameRunnerHead = (gameRunnerHead + 1) % NUM_LEDS;
+        gameRunStep++;
+        hue += 4;
+      }
+
+      if (gameRunStep >= gameRunTotalSteps) {
+        gameRunnerHead = sensorCenter(positionIndex);
+        gameState = GAME_END;
+      }
+    }
+    return;
+  }
+
+  if (gameState == GAME_END) {
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+
+    const bool blinkOn = ((millis() / 250) % 2) == 0;
+    const CRGB blinkColor = blinkOn ? CRGB(CHSV(hue, 255, 255)) : CRGB::Black;
+    const int start = kSensorStart[positionIndex];
+    const int end = start + kSensorLength[positionIndex];
+    for (int led = start; led < end && led < NUM_LEDS; ++led) {
+      leds[led] = blinkColor;
+    }
+
+    if (blinkOn) {
+      leds[sensorCenter(positionIndex)] = kSensorColors[positionIndex];
+    }
+
+    hue += 2;
+    if (btnRight) {
+      gameState = GAME_IDLE;
+      gameRunStep = 0;
+      gameRunTotalSteps = 0;
+      fill_solid(leds, NUM_LEDS, CRGB::Black);
+    }
+    return;
+  }
 }
 
 // ----- //

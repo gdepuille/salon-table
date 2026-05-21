@@ -22,15 +22,6 @@ enum LedMode {
   SENSOR = 3,
 };
 
-enum LedAnimation {
-  RAINBOW = 0,
-  RAINBOW_GLITTER = 1,
-  JUGGLE = 2,
-  SINELON = 3,
-  CONFETTI = 4,
-  BPM = 5
-};
-
 class LedController {
 public:
   LedController() = default;
@@ -46,9 +37,7 @@ public:
     "Sinelon", "BPM","Juggle"
   };
 
-  std::vector<String> gameNames = {
-    "Led Runner", "Random Choose"
-  };
+  std::vector<String> gameNames = {"Random Choose" };
 
   LedController* setEnabled(bool value);
   bool isEnabled() const;
@@ -81,21 +70,15 @@ public:
   void startupGoogleHome();
 
 private:
-  CRGB leds[NUM_LEDS];
 
-  bool enabled = true;
-  bool pulse = false;
-  LedMode ledMode = SENSOR;
-  uint8_t index = 0;
-
-  bool btnLeft;
-  bool btnRight;
-
-  uint8_t hue = 0;
-  uint8_t brightness = 180;
-  CRGB color = CRGB::White;
-
-  uint8_t sensorTouched = 0;
+  enum LedAnimation : uint8_t {
+    RAINBOW = 0,
+    RAINBOW_GLITTER = 1,
+    JUGGLE = 2,
+    SINELON = 3,
+    CONFETTI = 4,
+    BPM = 5
+  };
 
   enum OtaState : uint8_t {
     OTA_IDLE = 0,
@@ -103,6 +86,34 @@ private:
     OTA_PROGRESS = 2,
     OTA_END = 3
   };
+
+  enum GameState : uint8_t {
+    GAME_IDLE = 0,
+    GAME_RUN = 1,
+    GAME_END = 2
+  };
+
+  CRGB leds[NUM_LEDS];
+
+  bool enabled = true;
+  bool pulse = false;
+  LedMode ledMode = SENSOR;
+  GameState gameState = GAME_IDLE;
+  uint8_t index = 0;
+  uint8_t positionIndex = 0;
+  uint16_t gameRunnerHead = 0;
+  uint16_t gameRunStep = 0;
+  uint16_t gameRunTotalSteps = 0;
+  uint32_t gameLastStepAt = 0;
+
+  bool btnLeft = false;
+  bool btnRight = false;
+
+  uint8_t hue = 0;
+  uint8_t brightness = 180;
+  CRGB color = CRGB::White;
+
+  uint8_t sensorTouched = 0;
 
   OtaState otaState = OTA_IDLE;
   uint8_t otaPercent = 0;
@@ -120,7 +131,6 @@ private:
   void animateConfetti();
   void animateBpm();
 
-  void gameLedRunner();
   void gameRandomChoose();
 
   void addGlitter(fract8 chanceOfGlitter);
