@@ -138,6 +138,16 @@ void LedController::btnLeftPressed() {
   btnLeft = true;
 }
 
+void LedController::btnLeftDoublePressed() {
+  switch (getMode()) {
+    case ANIMATION: setMode(GAME); break;
+    case GAME: setMode(SENSOR); break;
+    case SENSOR:
+    case COLOR:
+    default: setMode(ANIMATION); break;
+  }
+}
+
 void LedController::btnRightPressed() {
   Log.infoln("Button right pressed");
   btnRight = true;

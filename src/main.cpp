@@ -56,8 +56,9 @@ void setup() {
   pinMode(LED_BLUE, OUTPUT);
 
   // Init buttons
-  btnLeft.attachClick([]() { btnLeftClicked = !btnLeftClicked; });
-  btnRight.attachClick([]() { btnRightClicked = !btnRightClicked; });
+  btnLeft.attachClick([]() { led.btnLeftPressed(); });
+  btnLeft.attachDoubleClick([]() { led.btnLeftDoublePressed(); });
+  btnRight.attachClick([]() { led.btnRightPressed(); });
 
   Log.infoln("Capacitive sensor configuration");
   if (!cap.begin()) {

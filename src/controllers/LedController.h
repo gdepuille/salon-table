@@ -71,6 +71,7 @@ public:
   uint8_t getSensorTouched() const;
 
   void btnLeftPressed();
+  void btnLeftDoublePressed();
   void btnRightPressed();
 
   void otaStart();
