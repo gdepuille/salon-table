@@ -39,10 +39,15 @@ public:
   void process(uint8_t sensorTouched);
 
   String animationName();
+  String gameName();
 
   std::vector<String> animationNames = {
     "Rainbow", "Rainbow (glitter)", "Confetti",
     "Sinelon", "BPM","Juggle"
+  };
+
+  std::vector<String> gameNames = {
+    "Led Runner", "Random Choose"
   };
 
   LedController* setEnabled(bool value);
@@ -105,6 +110,9 @@ private:
   void animateSinelon();
   void animateConfetti();
   void animateBpm();
+
+  void gameLedRunner();
+  void gameRandomChoose();
 
   void addGlitter(fract8 chanceOfGlitter);
 };

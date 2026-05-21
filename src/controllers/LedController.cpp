@@ -309,6 +309,13 @@ void LedController::animateJuggle() {
 // Game //
 // ---- //
 
+void LedController::gameLedRunner() {
+  // TODO
+}
+
+void LedController::gameRandomChoose() {
+  // TODO
+}
 
 // ----- //
 // Utils //
@@ -323,7 +330,7 @@ void LedController::addGlitter(fract8 chanceOfGlitter) {
 void LedController::checkIndex() {
   uint8_t max = 0;
   if (ledMode == ANIMATION) max = animationNames.size() - 1;
-  else if (ledMode == GAME) max = 1;
+  else if (ledMode == GAME) max = gameNames.size() - 1;
 
   if (index < 0) index = 0;
   if (index > max) index = max;
