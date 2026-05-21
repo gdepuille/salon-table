@@ -33,7 +33,7 @@ private:
   void handleGetStatus(AsyncWebServerRequest *request) const;
 
   void handleGetAnimations(AsyncWebServerRequest *request) const;
-  static void handleGetGames(AsyncWebServerRequest *request);
+  void handleGetGames(AsyncWebServerRequest *request) const;
 
   void handlePostState(AsyncWebServerRequest *request, const JsonVariant &json) const;
   void handlePostSensor(AsyncWebServerRequest *request, const JsonVariant &json) const;

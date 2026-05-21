@@ -119,19 +119,16 @@ void APIService::handleGetAnimations(AsyncWebServerRequest *request) const {
   request->send(response);
 }
 
-void APIService::handleGetGames(AsyncWebServerRequest *request) {
+void APIService::handleGetGames(AsyncWebServerRequest *request) const {
   Log.infoln("GET /games");
   auto *response = new AsyncJsonResponse();
   const JsonArray array = response->getRoot().to<JsonArray>();
 
-
-  const JsonObject o1 = array[0].to<JsonObject>();
-  o1["id"] = 0;
-  o1["name"] = "Randomize drink";
-
-  const JsonObject o2 = array[1].to<JsonObject>();
-  o2["id"] = 1;
-  o2["name"] = "Speed cursor";
+  for (int i = 0; i < ledController->gameNames.size(); i++) {
+    const JsonObject object = array[i].to<JsonObject>();
+    object["id"] = i;
+    object["name"] = ledController->gameNames[i];
+  }
 
   response->setLength();
   request->send(response);
