@@ -150,19 +150,23 @@ void LedController::otaEnd() {
 void LedController::callAnnimation() {
   checkIndex();
   switch (index) { // Appel dynamique
-    case 0: rainbow(); break;
-    case 1: rainbowWithGlitter(); break;
-    case 2: confetti(); break;
-    case 3: sinelon(); break;
-    case 4: bpm(); break;
+    case 0: animateRainbow(); break;
+    case 1: animateRainbowWithGlitter(); break;
+    case 2: animateConfetti(); break;
+    case 3: animateSinelon(); break;
+    case 4: animateBpm(); break;
     case 5:
-    default: juggle();
+    default: animateJuggle();
   }
 }
 
 void LedController::callGame() {
   checkIndex();
-  // NOPE
+  switch (index) {
+    case 0: gameLedRunner(); break;
+    case 1: gameRandomChoose(); break;
+    default: break;
+  }
 }
 
 String LedController::animationName() {
@@ -256,32 +260,32 @@ void LedController::updateOtaLeds() {
 // ANIMATION //
 // --------- //
 
-void LedController::rainbow() {
+void LedController::animateRainbow() {
   // FastLED's built-in rainbow generator
   fill_rainbow(leds, NUM_LEDS, hue, 7);
 }
 
-void LedController::rainbowWithGlitter() {
+void LedController::animateRainbowWithGlitter() {
   // built-in FastLED rainbow, plus some random sparkly glitter
-  rainbow();
+  animateRainbow();
   addGlitter(80);
 }
 
-void LedController::confetti() {
+void LedController::animateConfetti() {
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy(leds, NUM_LEDS, 10);
   int pos = random16(NUM_LEDS);
   leds[pos] += CHSV(hue + random8(64), 200, 255);
 }
 
-void LedController::sinelon() {
+void LedController::animateSinelon() {
   // a colored dot sweeping back and forth, with fading trails
   fadeToBlackBy(leds, NUM_LEDS, 20);
   int pos = beatsin16(13, 0, NUM_LEDS - 1);
   leds[pos] += CHSV(hue, 255, 192);
 }
 
-void LedController::bpm() {
+void LedController::animateBpm() {
   // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
   uint8_t BeatsPerMinute = 62;
   CRGBPalette16 palette = PartyColors_p;
@@ -291,7 +295,7 @@ void LedController::bpm() {
   }
 }
 
-void LedController::juggle() {
+void LedController::animateJuggle() {
   // eight colored dots, weaving in and out of sync with each other
   fadeToBlackBy(leds, NUM_LEDS, 20);
   byte dothue = 0;

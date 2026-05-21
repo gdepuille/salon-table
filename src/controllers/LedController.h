@@ -99,12 +99,12 @@ private:
   void updateOtaLeds();
   void checkIndex();
 
-  void rainbow();
-  void rainbowWithGlitter();
-  void juggle();
-  void sinelon();
-  void confetti();
-  void bpm();
+  void animateRainbow();
+  void animateRainbowWithGlitter();
+  void animateJuggle();
+  void animateSinelon();
+  void animateConfetti();
+  void animateBpm();
 
   void addGlitter(fract8 chanceOfGlitter);
 };
