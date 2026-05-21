@@ -228,12 +228,13 @@ void LedController::updateSensorLeds() {
 
 void LedController::updateOtaLeds() {
   if (otaState == OTA_START) {
-    fill_solid(leds, NUM_LEDS, CRGB::Red);
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    this->setBrightness(128); // 50% to not blind people during OTA
     return;
   }
 
   if (otaState == OTA_PROGRESS) {
-    fill_solid(leds, NUM_LEDS, CRGB::Red);
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
 
     int greenCount = (NUM_LEDS * otaPercent) / 100;
     if (greenCount > NUM_LEDS) {
@@ -241,13 +242,13 @@ void LedController::updateOtaLeds() {
     }
 
     for (int i = 0; i < greenCount; ++i) {
-      leds[i] = CRGB::Green;
+      leds[i] = CRGB::White;
     }
     return;
   }
 
   if (otaState == OTA_END) {
-    fill_solid(leds, NUM_LEDS, CRGB::Blue);
+    fill_solid(leds, NUM_LEDS, CRGB::Green);
   }
 }
 
