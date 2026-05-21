@@ -81,15 +81,7 @@ void loop() {
   }
 
   EVERY_N_MILLIS(20) {
-    auto touched = cap.touched();
-    if (touched == 0) {
-      if (btnLeftClicked) {
-        touched |= 1 << 0;
-      }
-      if (btnRightClicked) {
-        touched |= 1 << 1;
-      }
-    }
+    const auto touched = cap.touched();
     led.process(touched);
   }
 }

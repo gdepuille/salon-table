@@ -45,6 +45,10 @@ void LedController::process(const uint8_t value) {
   // TODO Pulse
   FastLED.setBrightness(brightness);
   FastLED.show();
+
+  // Reset btnPressed
+  btnLeft = false;
+  btnRight = false;
 }
 
 LedController* LedController::setEnabled(const bool value) {
@@ -129,6 +133,16 @@ uint8_t LedController::getSensorTouched() const {
   return sensorTouched;
 }
 
+void LedController::btnLeftPressed() {
+  Log.infoln("Button left pressed");
+  btnLeft = true;
+}
+
+void LedController::btnRightPressed() {
+  Log.infoln("Button right pressed");
+  btnRight = true;
+}
+
 void LedController::otaStart() {
   otaPercent = 0;
   otaState = OTA_START;
@@ -148,6 +162,13 @@ void LedController::otaEnd() {
 }
 
 void LedController::callAnnimation() {
+  if (btnLeft) {
+    index--;
+  }
+  if (btnRight) {
+    index++;
+  }
+
   checkIndex();
   switch (index) { // Appel dynamique
     case 0: animateRainbow(); break;
@@ -161,6 +182,13 @@ void LedController::callAnnimation() {
 }
 
 void LedController::callGame() {
+  if (btnLeft) {
+    index--;
+  }
+  if (btnRight) {
+    index++;
+  }
+
   checkIndex();
   switch (index) {
     case 0: gameLedRunner(); break;

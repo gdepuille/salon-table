@@ -36,7 +36,7 @@ public:
   LedController() = default;
 
   void setup();
-  void process(uint8_t sensorTouched);
+  void process(uint8_t value);
 
   String animationName();
   String gameName();
@@ -70,6 +70,9 @@ public:
 
   uint8_t getSensorTouched() const;
 
+  void btnLeftPressed();
+  void btnRightPressed();
+
   void otaStart();
   void otaProgress(uint8_t percent);
   void otaEnd();
@@ -81,6 +84,9 @@ private:
   bool pulse = false;
   LedMode ledMode = SENSOR;
   uint8_t index = 0;
+
+  bool btnLeft;
+  bool btnRight;
 
   uint8_t hue = 0;
   uint8_t brightness = 180;
