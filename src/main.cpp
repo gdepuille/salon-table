@@ -68,6 +68,10 @@ void setup() {
     cap_present = true;
     Log.infoln("CAP1188 found");
   }
+
+  // Animation de boot visuelle juste après l'init.
+  led.startupGoogleHome();
+
 }
 
 void loop() {

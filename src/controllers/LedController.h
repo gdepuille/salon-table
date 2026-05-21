@@ -78,6 +78,8 @@ public:
   void otaProgress(uint8_t percent);
   void otaEnd();
 
+  void startupGoogleHome();
+
 private:
   CRGB leds[NUM_LEDS];
 

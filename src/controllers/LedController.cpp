@@ -171,6 +171,42 @@ void LedController::otaEnd() {
   otaState = OTA_END;
 }
 
+void LedController::startupGoogleHome() {
+  const CRGB googleColors[4] = {
+    CRGB(66, 133, 244),  // Blue
+    CRGB(234, 67, 53),   // Red
+    CRGB(251, 188, 5),   // Yellow
+    CRGB(52, 168, 83)    // Green
+  };
+
+  Log.infoln("Startup animation: Google Home style");
+
+  fill_solid(leds, NUM_LEDS, CRGB::Black);
+  FastLED.setBrightness(brightness);
+  FastLED.show();
+  delay(80);
+
+  const uint16_t spacing = NUM_LEDS / 4;
+  for (uint16_t step = 0; step < (NUM_LEDS * 2); ++step) {
+    fadeToBlackBy(leds, NUM_LEDS, 85);
+    for (uint8_t i = 0; i < 4; ++i) {
+      const uint16_t pos = (step + (i * spacing)) % NUM_LEDS;
+      leds[pos] = googleColors[i];
+    }
+    FastLED.show();
+    delay(14);
+  }
+
+  for (uint8_t fade = 0; fade < 8; ++fade) {
+    fadeToBlackBy(leds, NUM_LEDS, 48);
+    FastLED.show();
+    delay(22);
+  }
+
+  fill_solid(leds, NUM_LEDS, CRGB::Black);
+  FastLED.show();
+}
+
 void LedController::callAnnimation() {
   if (btnLeft) {
     index--;
