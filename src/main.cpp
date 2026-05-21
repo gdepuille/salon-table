@@ -21,9 +21,7 @@ auto cap_present = false;
 
 // Buttons
 auto btnLeft = OneButton(D4, true, true);
-auto btnLeftClicked = false;
 auto btnRight = OneButton(D5, true, true);
-auto btnRightClicked = false;
 
 void setup() {
   Serial.begin(115200);
