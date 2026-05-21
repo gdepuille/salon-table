@@ -12,7 +12,7 @@ void LedController::setup() {
   FastLED.setBrightness(brightness);
 }
 
-void LedController::process(uint8_t sensorTouched) {
+void LedController::process(const uint8_t value) {
   if (otaState != OTA_IDLE) {
     updateOtaLeds();
     FastLED.setBrightness(brightness);
@@ -20,7 +20,7 @@ void LedController::process(uint8_t sensorTouched) {
     return;
   }
 
-  this->sensorTouched = sensorTouched;
+  this->sensorTouched = value;
 
   if (enabled) {
     if (ledMode == COLOR) {
@@ -274,14 +274,14 @@ void LedController::animateRainbowWithGlitter() {
 void LedController::animateConfetti() {
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy(leds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
+  const int pos = random16(NUM_LEDS);
   leds[pos] += CHSV(hue + random8(64), 200, 255);
 }
 
 void LedController::animateSinelon() {
   // a colored dot sweeping back and forth, with fading trails
   fadeToBlackBy(leds, NUM_LEDS, 20);
-  int pos = beatsin16(13, 0, NUM_LEDS - 1);
+  const int pos = beatsin16(13, 0, NUM_LEDS - 1);
   leds[pos] += CHSV(hue, 255, 192);
 }
 
