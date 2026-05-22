@@ -1,0 +1,60 @@
+site_name: Salon Table
+site_description: Firmware documentation for the LED coffee table (ESP32 Nano)
+site_author: Gregory DEPUILLE
+repo_url: https://github.com/gdepuille/salon-table
+repo_name: gdepuille/salon-table
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Hardware: getting-started/hardware.md
+      - Flashing: getting-started/flashing.md
+      - Configuration: getting-started/configuration.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - LedController: architecture/led-controller.md
+      - NetworkController: architecture/network-controller.md
+      - APIService: architecture/api-service.md
+  - API Reference:
+      - Endpoints: api/endpoints.md
+  - LED Modes:
+      - Sensor Mode: modes/sensor.md
+      - Color Mode: modes/color.md
+      - Animation Mode: modes/animation.md
+      - Game Mode: modes/game.md
+  - OTA Updates: ota.md
+
