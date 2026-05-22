@@ -1,10 +1,13 @@
 site_name: Salon Table
 site_description: Firmware documentation for the LED coffee table (ESP32 Nano)
 site_author: Gregory DEPUILLE
+site_url: https://gdepuille.github.io/salon-table/
+site_dir: ../build/site
+
 repo_url: https://github.com/gdepuille/salon-table
 repo_name: gdepuille/salon-table
 
-docs_dir: docs
+
 
 theme:
   name: material
