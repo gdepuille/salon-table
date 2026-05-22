@@ -4,6 +4,8 @@ site_author: Gregory DEPUILLE
 repo_url: https://github.com/gdepuille/salon-table
 repo_name: gdepuille/salon-table
 
+docs_dir: docs
+
 theme:
   name: material
   palette:
@@ -31,7 +33,11 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - tables
@@ -57,4 +63,3 @@ nav:
       - Animation Mode: modes/animation.md
       - Game Mode: modes/game.md
   - OTA Updates: ota.md
-
