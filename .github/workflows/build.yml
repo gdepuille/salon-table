@@ -1,0 +1,58 @@
+name: Build Firmware
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v5
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-platformio-${{ hashFiles('**/platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-platformio-
+
+      - name: Install PlatformIO
+        run: |
+          pip install --upgrade pip
+          pip install platformio
+
+      - name: Copy sample secrets include
+        run: cp -vf include/common.secrets.h.example include/common.secrets.h
+
+      - name: Build firmware (nanoesp32)
+        run: platformio run -e nanoesp32
+
+      - name: Upload firmware artifacts
+        if: success()
+        uses: actions/upload-artifact@v6
+        with:
+          name: firmware-nanoesp32
+          path: |
+            .pio/build/nanoesp32/firmware.bin
+            .pio/build/nanoesp32/firmware.elf
+          retention-days: 30
+
+      - name: Build report
+        if: success()
+        run: |
+          echo "✅ Firmware build successful!"
+          ls -lh .pio/build/nanoesp32/firmware.*
+
