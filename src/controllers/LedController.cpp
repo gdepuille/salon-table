@@ -265,8 +265,18 @@ void LedController::callAnnimation() {
     case 2: animateConfetti(); break;
     case 3: animateSinelon(); break;
     case 4: animateBpm(); break;
-    case 5:
-    default: animateJuggle();
+    case 5: animateJuggle(); break;
+    case 6: animateTwinkleWarm(); break;
+    case 7: animateFireplace(); break;
+    case 8: animateOceanWave(); break;
+    case 9: animateMeteorRain(); break;
+    case 10: animateCylonSweep(); break;
+    case 11: animateTheaterChase(); break;
+    case 12: animateSparkleBurst(); break;
+    case 13: animateLarsonMulti(); break;
+    case 14: animatePlasma(); break;
+    case 15:
+    default: animatePaletteFlow();
   }
 }
 
@@ -396,6 +406,126 @@ void LedController::animateJuggle() {
     dothue += 32;
   }
 }
+
+void LedController::animateTwinkleWarm() {
+  fadeToBlackBy(leds, NUM_LEDS, 18);
+  if (random8() < 90) {
+    leds[random16(NUM_LEDS)] += CHSV(20 + random8(22), 170, 220 + random8(35));
+  }
+}
+
+void LedController::animateFireplace() {
+  static uint16_t heat[NUM_LEDS];
+
+  for (int i = 0; i < NUM_LEDS; ++i) {
+    heat[i] = qsub8(heat[i], random8(0, 24));
+  }
+
+  for (int k = NUM_LEDS - 1; k >= 2; --k) {
+    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
+  }
+
+  if (random8() < 120) {
+    const uint8_t y = random8(7);
+    heat[y] = qadd8(heat[y], random8(120, 255));
+  }
+
+  for (int j = 0; j < NUM_LEDS; ++j) {
+    const uint8_t colorIndex = scale8(static_cast<uint8_t>(heat[j]), 240);
+    leds[j] = ColorFromPalette(HeatColors_p, colorIndex);
+  }
+}
+
+void LedController::animateOceanWave() {
+  const CRGBPalette16 oceanPalette = CRGBPalette16(
+    CRGB(0, 6, 20), CRGB(0, 30, 80), CRGB(0, 90, 170), CRGB(20, 160, 220)
+  );
+  const uint8_t waveA = beatsin8(9, 0, 255);
+  const uint8_t waveB = beatsin8(13, 0, 255);
+
+  for (int i = 0; i < NUM_LEDS; ++i) {
+    const uint8_t idx = hue + (i * 3) + waveA + scale8(waveB, i);
+    leds[i] = ColorFromPalette(oceanPalette, idx, 180);
+  }
+}
+
+void LedController::animateMeteorRain() {
+  static int16_t head = 0;
+  static int8_t direction = 1;
+  constexpr uint8_t kTail = 20;
+
+  fadeToBlackBy(leds, NUM_LEDS, 40);
+
+  for (uint8_t i = 0; i < kTail; ++i) {
+    const uint16_t pos = wrapLedIndex(head - (direction * i));
+    const uint8_t value = 255 - (i * (255 / kTail));
+    leds[pos] += CHSV(hue + i * 4, 220, value);
+  }
+
+  head += direction;
+  if (head >= NUM_LEDS + static_cast<int16_t>(kTail)) {
+    direction = -1;
+    head = NUM_LEDS - 1;
+  }
+  if (head < -static_cast<int16_t>(kTail)) {
+    direction = 1;
+    head = 0;
+  }
+}
+
+void LedController::animateCylonSweep() {
+  fadeToBlackBy(leds, NUM_LEDS, 50);
+  const int pos = beatsin16(18, 0, NUM_LEDS - 1);
+  leds[pos] = CHSV(0, 255, 255);
+  leds[wrapLedIndex(pos - 1)] += CHSV(0, 255, 128);
+  leds[wrapLedIndex(pos + 1)] += CHSV(0, 255, 128);
+}
+
+void LedController::animateTheaterChase() {
+  static uint8_t step = 0;
+  fadeToBlackBy(leds, NUM_LEDS, 80);
+  for (int i = step; i < NUM_LEDS; i += 3) {
+    leds[i] = CHSV(hue + i * 2, 220, 255);
+  }
+  step = (step + 1) % 3;
+}
+
+void LedController::animateSparkleBurst() {
+  fadeToBlackBy(leds, NUM_LEDS, 30);
+  if (random8() < 40) {
+    const uint16_t center = random16(NUM_LEDS);
+    leds[center] = CHSV(hue + random8(64), 150, 255);
+    leds[wrapLedIndex(center - 1)] += CHSV(hue + 20, 180, 220);
+    leds[wrapLedIndex(center + 1)] += CHSV(hue + 20, 180, 220);
+  }
+}
+
+void LedController::animateLarsonMulti() {
+  fadeToBlackBy(leds, NUM_LEDS, 45);
+  const int p1 = beatsin16(11, 0, NUM_LEDS - 1);
+  const int p2 = beatsin16(15, 0, NUM_LEDS - 1);
+  const int p3 = beatsin16(19, 0, NUM_LEDS - 1);
+  leds[p1] += CHSV(0, 255, 255);
+  leds[p2] += CHSV(96, 255, 255);
+  leds[p3] += CHSV(160, 255, 255);
+}
+
+void LedController::animatePlasma() {
+  for (int i = 0; i < NUM_LEDS; ++i) {
+    const uint8_t v = sin8((i * 10) + hue) + sin8((i * 7) + hue * 2) / 2;
+    leds[i] = CHSV(v, 220, 255);
+  }
+}
+
+void LedController::animatePaletteFlow() {
+  static uint8_t startIndex = 0;
+  startIndex += 2;
+  for (int i = 0; i < NUM_LEDS; ++i) {
+    leds[i] = ColorFromPalette(RainbowStripeColors_p, startIndex + (i * 4), 255);
+  }
+}
+
+
 
 // ---- //
 // Game //

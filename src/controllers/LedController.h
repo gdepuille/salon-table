@@ -34,7 +34,10 @@ public:
 
   std::vector<String> animationNames = {
     "Rainbow", "Rainbow (glitter)", "Confetti",
-    "Sinelon", "BPM","Juggle"
+    "Sinelon", "BPM", "Juggle",
+    "Twinkle Warm", "Fireplace", "Ocean Wave", "Meteor Rain",
+    "Cylon Sweep", "Theater Chase", "Sparkle Burst", "Larson Multi",
+    "Plasma", "Palette Flow"
   };
 
   std::vector<String> gameNames = {"Random Choose" };
@@ -74,10 +77,20 @@ private:
   enum LedAnimation : uint8_t {
     RAINBOW = 0,
     RAINBOW_GLITTER = 1,
-    JUGGLE = 2,
+    CONFETTI = 2,
     SINELON = 3,
-    CONFETTI = 4,
-    BPM = 5
+    BPM = 4,
+    JUGGLE = 5,
+    TWINKLE_WARM = 6,
+    FIREPLACE = 7,
+    OCEAN_WAVE = 8,
+    METEOR_RAIN = 9,
+    CYLON_SWEEP = 10,
+    THEATER_CHASE = 11,
+    SPARKLE_BURST = 12,
+    LARSON_MULTI = 13,
+    PLASMA = 14,
+    PALETTE_FLOW = 15
   };
 
   enum OtaState : uint8_t {
@@ -130,6 +143,16 @@ private:
   void animateSinelon();
   void animateConfetti();
   void animateBpm();
+  void animateTwinkleWarm();
+  void animateFireplace();
+  void animateOceanWave();
+  void animateMeteorRain();
+  void animateCylonSweep();
+  void animateTheaterChase();
+  void animateSparkleBurst();
+  void animateLarsonMulti();
+  void animatePlasma();
+  void animatePaletteFlow();
 
   void gameRandomChoose();
 
