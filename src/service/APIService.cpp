@@ -96,7 +96,7 @@ void APIService::handleGetStatus(AsyncWebServerRequest *request) const {
   } else {
     const auto data = root["game"].to<JsonObject>();
     data["id"] = ledController->getIndex();
-    data["name"] = "TO BE DEFINED";
+    data["name"] = ledController->gameName();
 
   }
 
@@ -211,7 +211,7 @@ void APIService::handlePostGame(AsyncWebServerRequest *request, const JsonVarian
   auto jsonObj = json.as<JsonObject>();
   ledController->setMode(GAME);
   ledController->setIndex(jsonObj["id"]);
-  Log.infoln(" - Game name : %s", "TO BE DEFINED");
+  Log.infoln(" - Game name : %s", ledController->gameName().c_str());
 
   auto *response = new AsyncJsonResponse();
   const JsonObject root = response->getRoot().to<JsonObject>();
