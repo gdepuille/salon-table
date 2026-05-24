@@ -14,8 +14,8 @@ SENSOR ──────────────────► ANIMATION ─�
 |-------------|-------|-------------------------------------------|
 | `SENSOR`    | 3     | Each zone lights up when touched (default)|
 | `COLOR`     | 0     | Solid user-defined colour                 |
-| `ANIMATION` | 1     | Built-in FastLED animations               |
-| `GAME`      | 2     | Mini-games (Random Choose, …)             |
+| `ANIMATION` | 1     | Built-in FastLED animations (16 effects)  |
+| `GAME`      | 2     | Mini-games (`Random Choose`, `Sensor Race`)|
 
 ## Public API
 
@@ -55,11 +55,16 @@ void startupGoogleHome();
 
 | Button | Action       | Effect                                      |
 |--------|-------------|---------------------------------------------|
-| Left   | Single click | prev index in current mode                  |
+| Left   | Single click | previous index in current mode              |
 | Left   | Double click | rotate `LedMode` circularly                 |
 | Left   | Long press   | brightness − 5 (min 0)                      |
 | Right  | Single click | next index in current mode                  |
 | Right  | Long press   | brightness + 5 (max 255)                    |
+
+When `LedMode == GAME`, index navigation switches between games:
+
+- `0`: `Random Choose`
+- `1`: `Sensor Race`
 
 ## OTA visual feedback
 

@@ -2,6 +2,8 @@
 
 **Mode ID:** `1`
 
+Total animations: **16**
+
 ## Available animations
 
 | ID | Name               | Description                                              |

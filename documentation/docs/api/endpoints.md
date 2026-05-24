@@ -68,7 +68,7 @@ Returns the current LED controller state.
 
 ## GET /animations
 
-Returns the list of available animations.
+Returns the list of available animations (**16 total**).
 
 **Response**
 
@@ -79,7 +79,17 @@ Returns the list of available animations.
   { "id": 2, "name": "Confetti" },
   { "id": 3, "name": "Sinelon" },
   { "id": 4, "name": "BPM" },
-  { "id": 5, "name": "Juggle" }
+  { "id": 5, "name": "Juggle" },
+  { "id": 6, "name": "Twinkle Warm" },
+  { "id": 7, "name": "Fireplace" },
+  { "id": 8, "name": "Ocean Wave" },
+  { "id": 9, "name": "Meteor Rain" },
+  { "id": 10, "name": "Cylon Sweep" },
+  { "id": 11, "name": "Theater Chase" },
+  { "id": 12, "name": "Sparkle Burst" },
+  { "id": 13, "name": "Larson Multi" },
+  { "id": 14, "name": "Plasma" },
+  { "id": 15, "name": "Palette Flow" }
 ]
 ```
 
@@ -93,7 +103,8 @@ Returns the list of available games.
 
 ```json
 [
-  { "id": 0, "name": "Random Choose" }
+  { "id": 0, "name": "Random Choose" },
+  { "id": 1, "name": "Sensor Race" }
 ]
 ```
 

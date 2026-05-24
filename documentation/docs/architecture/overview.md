@@ -32,6 +32,7 @@ flowchart TD
         updateSensor["updateSensorLeds()"]
         updateOta["updateOtaLeds()"]
         gameRandom["gameRandomChoose()"]
+        gameRace["gameSensorRace()"]
     end
 
     subgraph api["APIService (HTTP:80)"]

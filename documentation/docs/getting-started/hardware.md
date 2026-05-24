@@ -46,6 +46,8 @@ The **Adafruit CAP1188** communicates over I²C. It provides 8 independent touch
 | Left   | D4  | Single click: previous index / Double click: change mode / Long press: decrease brightness |
 | Right  | D5  | Single click: next index / Long press: increase brightness |
 
+In `GAME` mode, these same clicks select the current game index (`Random Choose` or `Sensor Race`).
+
 ## Built-in RGB LED
 
 Used as a visual indicator during OTA updates:
