@@ -257,9 +257,6 @@ void LedController::startupGoogleHome() {
 
 void LedController::callAnnimation() {
   if (btnLeft) {
-    index--;
-  }
-  if (btnRight) {
     index++;
   }
 
@@ -287,9 +284,6 @@ void LedController::callAnnimation() {
 
 void LedController::callGame() {
   if (btnLeft) {
-    index--;
-  }
-  if (btnRight) {
     index++;
   }
 
@@ -783,6 +777,5 @@ void LedController::checkIndex() {
   if (ledMode == ANIMATION) max = animationNames.size() - 1;
   else if (ledMode == GAME) max = gameNames.size() - 1;
 
-  if (index < 0) index = 0;
-  if (index > max) index = max;
+  if (index > max) index = 0;
 }
