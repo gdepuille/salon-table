@@ -568,9 +568,7 @@ void LedController::gameRandomChoose() {
       leds[ledIndex] = CHSV(hue + (offset * (255 / kRunnerSize)), 255, kRunnerMinValue + (offset * 12));
     }
 
-    leds[sensorCenter(positionIndex)] += CRGB(24, 24, 24);
-
-    const uint16_t currentDelay = map(gameRunStep, 0, gameRunTotalSteps, 12, 85);
+    const uint16_t currentDelay = map(gameRunStep, 0, gameRunTotalSteps, 5, 40);
     if (millis() - gameLastStepAt >= currentDelay) {
       gameLastStepAt = millis();
 
