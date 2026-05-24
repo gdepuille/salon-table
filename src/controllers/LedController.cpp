@@ -125,6 +125,7 @@ LedController* LedController::setMode(const LedMode value) {
   ledMode = value;
   if (ledMode == GAME) {
     gameState = GAME_IDLE;
+    resetSensorRace();
   }
   return this;
 }
@@ -165,6 +166,10 @@ LedController* LedController::setIndex(const uint8_t value) {
 
   Log.infoln("Change index : %d -> %d", this->index, value);
   this->index = value;
+  if (ledMode == GAME) {
+    gameState = GAME_IDLE;
+    resetSensorRace();
+  }
   return this;
 }
 
@@ -291,6 +296,7 @@ void LedController::callGame() {
   checkIndex();
   switch (index) {
     case 0: gameRandomChoose(); break;
+    case 1: gameSensorRace(); break;
     default: break;
   }
 }
@@ -606,6 +612,162 @@ void LedController::gameRandomChoose() {
     }
     return;
   }
+}
+
+void LedController::gameSensorRace() {
+  if (gameState == GAME_IDLE) {
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+
+    const uint8_t breath = beatsin8(10, 18, 90);
+    const bool phaseToggle = ((millis() / 700) % 2) == 0;
+    for (uint8_t sensor = 0; sensor < kSensorCount; ++sensor) {
+      if (((sensor + static_cast<uint8_t>(phaseToggle)) % 2) != 0) {
+        continue;
+      }
+
+      CRGB color = kSensorColors[sensor];
+      color.nscale8_video(breath);
+      const int start = kSensorStart[sensor];
+      const int end = start + kSensorLength[sensor];
+      for (int led = start; led < end && led < NUM_LEDS; ++led) {
+        leds[led] = color;
+      }
+    }
+
+    for (uint8_t sensor = 0; sensor < kSensorCount; ++sensor) {
+      if ((sensorTouched & (1 << sensor)) == 0) {
+        continue;
+      }
+
+      const int start = kSensorStart[sensor];
+      const int end = start + kSensorLength[sensor];
+      for (int led = start; led < end && led < NUM_LEDS; ++led) {
+        leds[led] = kSensorColors[sensor];
+      }
+    }
+
+    if (btnRight) {
+      const uint8_t selectedMask = sensorTouched;
+      const uint8_t playerCount = countActivePlayers(selectedMask);
+      if (playerCount < 2) {
+        Log.warningln("Sensor race: need at least 2 active sensors to start");
+        return;
+      }
+
+      raceActiveMask = selectedMask;
+      raceAliveMask = selectedMask;
+      raceWinner = 0;
+      racePrevTouched = sensorTouched;
+      for (uint8_t sensor = 0; sensor < kSensorCount; ++sensor) {
+        racePosition[sensor] = sensorCenter(sensor);
+      }
+
+      gameState = GAME_RUN;
+      Log.infoln("Sensor race: start with %d players", playerCount);
+    }
+    return;
+  }
+
+  if (gameState == GAME_RUN) {
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+
+    const uint8_t risingEdges = sensorTouched & ~racePrevTouched;
+    for (uint8_t sensor = 0; sensor < kSensorCount; ++sensor) {
+      const uint8_t bit = (1 << sensor);
+      if ((raceAliveMask & bit) == 0 || (risingEdges & bit) == 0) {
+        continue;
+      }
+
+      racePosition[sensor] = wrapLedIndex(static_cast<int32_t>(racePosition[sensor]) + 3);
+
+      for (uint8_t other = 0; other < kSensorCount; ++other) {
+        if (other == sensor) {
+          continue;
+        }
+
+        const uint8_t otherBit = (1 << other);
+        if ((raceAliveMask & otherBit) == 0) {
+          continue;
+        }
+
+        bool overlap = false;
+        for (int8_t ownOffset = -1; ownOffset <= 1 && !overlap; ++ownOffset) {
+          const uint16_t ownLed = wrapLedIndex(static_cast<int32_t>(racePosition[sensor]) + ownOffset);
+          for (int8_t otherOffset = -1; otherOffset <= 1; ++otherOffset) {
+            const uint16_t otherLed = wrapLedIndex(static_cast<int32_t>(racePosition[other]) + otherOffset);
+            if (ownLed == otherLed) {
+              overlap = true;
+              break;
+            }
+          }
+        }
+
+        if (overlap) {
+          raceAliveMask &= ~otherBit;
+          Log.infoln("Sensor race: player %d ate player %d", sensor + 1, other + 1);
+        }
+      }
+    }
+
+    for (uint8_t sensor = 0; sensor < kSensorCount; ++sensor) {
+      if ((raceAliveMask & (1 << sensor)) == 0) {
+        continue;
+      }
+
+      for (int8_t offset = -1; offset <= 1; ++offset) {
+        const uint16_t ledIndex = wrapLedIndex(static_cast<int32_t>(racePosition[sensor]) + offset);
+        leds[ledIndex] = kSensorColors[sensor];
+      }
+    }
+
+    const uint8_t aliveCount = countActivePlayers(raceAliveMask);
+    if (aliveCount <= 1) {
+      gameState = GAME_END;
+      raceWinner = 0;
+      for (uint8_t sensor = 0; sensor < kSensorCount; ++sensor) {
+        if ((raceAliveMask & (1 << sensor)) != 0) {
+          raceWinner = sensor;
+          break;
+        }
+      }
+      Log.infoln("Sensor race: winner is player %d", raceWinner + 1);
+    }
+
+    racePrevTouched = sensorTouched;
+    return;
+  }
+
+  if (gameState == GAME_END) {
+    const uint8_t breath = beatsin8(10, 24, 255);
+    CRGB winnerColor = kSensorColors[raceWinner];
+    winnerColor.nscale8_video(breath);
+    fill_solid(leds, NUM_LEDS, winnerColor);
+
+    if (btnRight) {
+      gameState = GAME_IDLE;
+      resetSensorRace();
+    }
+  }
+}
+
+void LedController::resetSensorRace() {
+  raceActiveMask = 0;
+  raceAliveMask = 0;
+  raceWinner = 0;
+  racePrevTouched = sensorTouched;
+  for (uint8_t i = 0; i < kSensorCount; ++i) {
+    racePosition[i] = sensorCenter(i);
+  }
+}
+
+uint8_t LedController::countActivePlayers(const uint8_t mask) const {
+  uint8_t count = 0;
+  for (uint8_t i = 0; i < kSensorCount; ++i) {
+    if ((mask & (1 << i)) != 0) {
+      count++;
+    }
+  }
+  return count;
 }
 
 // ----- //

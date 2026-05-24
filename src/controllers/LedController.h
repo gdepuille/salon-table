@@ -40,7 +40,7 @@ public:
     "Plasma", "Palette Flow"
   };
 
-  std::vector<String> gameNames = {"Random Choose" };
+  std::vector<String> gameNames = {"Random Choose", "Sensor Race"};
 
   LedController* setEnabled(bool value);
   bool isEnabled() const;
@@ -119,6 +119,12 @@ private:
   uint16_t gameRunTotalSteps = 0;
   uint32_t gameLastStepAt = 0;
 
+  uint8_t raceActiveMask = 0;
+  uint8_t raceAliveMask = 0;
+  uint8_t raceWinner = 0;
+  uint8_t racePrevTouched = 0;
+  uint16_t racePosition[8] = {0};
+
   bool btnLeft = false;
   bool btnRight = false;
 
@@ -155,6 +161,9 @@ private:
   void animatePaletteFlow();
 
   void gameRandomChoose();
+  void gameSensorRace();
+  void resetSensorRace();
+  uint8_t countActivePlayers(uint8_t mask) const;
 
   void addGlitter(fract8 chanceOfGlitter);
 };
